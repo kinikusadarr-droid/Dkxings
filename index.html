@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Sender • Hidden</title>
+    <title>Telegram Sender • Encrypted</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -105,7 +105,7 @@
 <body>
 
 <div class="container">
-    <h1>📤 Hidden Sender</h1>
+    <h1>📤 Encrypted Sender</h1>
     <div class="sub">Kirim teks, gambar, video, file ke Telegram Bot</div>
 
     <div class="form-group">
@@ -131,35 +131,29 @@
     <button class="btn" onclick="sendToTelegram()">🚀 KIRIM</button>
     <div class="status" id="status">Siap...</div>
 
-    <div class="footer"><span>by Pikxyzz</span> • HIDDEN SENDER</div>
+    <div class="footer"><span>by Pikxyzz</span> • ENCRYPTED SENDER</div>
 </div>
 
 <script>
-    // ===== FUNGSI DECODE TOKEN & CHAT ID (Membingungkan) =====
-    function getToken() {
-        let a = "8608", b = "0735", c = "73:AAH", d = "bPbrLn2E", e = "UdG31NA4i", f = "6sBwBT63wz8QWTQ";
-        let g = "AAHbPbrLn2EUdG31NA4i6sBwBT63wz8QWTQ";
-        // Decoy variables
-        let _x = "random", _y = "noise";
-        let token = a + b + c + d + e + f;
-        // Reverse check
-        if (token.length !== 46) { token = "error"; }
-        return token;
+    // ===== ===
+    function xorDecrypt(encoded, key) {
+        const str = atob(encoded);
+        let result = "";
+        for (let i = 0; i < str.length; i++) {
+            result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        }
+        return result;
     }
 
-    function getChatId() {
-        let x = "850", y = "963", z = "3837";
-        let _dummy = "123456789";
-        let chat = x + y + z;
-        if (chat.length !== 10) { chat = "error"; }
-        return chat;
-    }
+    const KEY = "pikxyzz"; // jembut
+    const ENC_TOKEN = "U1R2UU5MQkRGGRkeSkBQFRlZRUh8HkRlSkgZGRh8T1hHGRweXUhM";
+    const ENC_CHAT = "UR0dG1hYBh4dEB0dFh0eEh0e";
 
-    // ===== BOT CONFIG (Tersembunyi) =====
-    const BOT_TOKEN = getToken();
-    const CHAT_ID = getChatId();
-    // Ganti dengan URL Tunnel Cloudflare tuan
-    const BACKEND_URL = "https://35387694a6095220-103-183-58-238.serveousercontent.com/send_photo"; // ← GANTI INI
+    const BOT_TOKEN = xorDecrypt(ENC_TOKEN, KEY);
+    const CHAT_ID = xorDecrypt(ENC_CHAT, KEY);
+
+    // Ganti 
+    const BACKEND_URL = "https://422d0a67f0e27136-103-183-58-238.serveousercontent.com/send_photo"; // ← GANTI INI
 
     document.getElementById('type').addEventListener('change', function() {
         const type = this.value;
